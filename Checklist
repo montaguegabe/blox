@@ -1,3 +1,0 @@
-CHECKLIST
-[-] Check if transform function sets need object to be set in constructor
-[-] Don't needlessly include in header files

@@ -5,8 +5,6 @@
 //  The tessellation manager provides mathematical operations to ensure that
 //  moved blocks fall into the user's tessellation.
 //
-//  Created by Gabe Montague on 3/19/15.
-//
 //
 
 #ifndef Blox_Tessellation_h

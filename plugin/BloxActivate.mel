@@ -4,9 +4,6 @@
 //
 //  Deactivate blox hotkeys
 //
-//  Created by Gabe Montague on 3/16/15.
-//
-//
 
 // Define runtime commands referenced by the hotkeys
 runTimeCommand

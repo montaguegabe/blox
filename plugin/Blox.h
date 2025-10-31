@@ -2,9 +2,6 @@
 //  Blox.h
 //  Blox
 //
-//  Created by Gabe Montague on 3/18/15.
-//
-//
 
 #ifndef Blox_blox_h
 #define Blox_blox_h

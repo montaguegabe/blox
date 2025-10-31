@@ -2,8 +2,6 @@
 //  Debug.h
 //  Blox
 //
-//  Created by Gabe Montague on 3/19/15.
-//
 //
 
 #ifndef Blox_Debug_h

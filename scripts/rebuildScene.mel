@@ -1,0 +1,250 @@
+// LATEST USABLE SCRIPT IS THIS ONE!!
+global proc int SnapValue( float $value, int $grid )
+{
+    $value /= $grid;
+    $integer = `floor ($value + 0.5)`;
+    $integer *= $grid;
+    return $integer;
+}
+global proc PushLength ( string $attr, string $block, string $axis, string $filter )
+{
+        $onlyErrors = true;
+
+        // Get floating point bounding box data
+        float $Axmin = `getAttr ($block+".boundingBoxMinX")`;
+        float $Aymin = `getAttr ($block+".boundingBoxMinY")`;
+        float $Azmin = `getAttr ($block+".boundingBoxMinZ")`;
+        float $Axmax = `getAttr ($block+".boundingBoxMaxX")`;
+        float $Aymax = `getAttr ($block+".boundingBoxMaxY")`;
+        float $Azmax = `getAttr ($block+".boundingBoxMaxZ")`;
+        
+        // Snap bounding box data to integers
+        int $xmin = `SnapValue $Axmin 5`;
+        int $ymin = `SnapValue $Aymin 5`;
+        int $zmin = `SnapValue $Azmin 5`;
+        int $xmax = `SnapValue $Axmax 5`;
+        int $ymax = `SnapValue $Aymax 5`;
+        int $zmax = `SnapValue $Azmax 5`;
+        
+        // Cycle through all secondary blocks
+        $blockList2 = `ls -tr $filter`;
+        for($secondaryBlock in $blockList2)
+        {
+            // Remove duplicates and menu items
+            if( ($secondaryBlock==$block)||(isParentOf("cameraMenu",$secondaryBlock)) ) continue;
+
+            if(!$onlyErrors)print $secondaryBlock;
+            if(!$onlyErrors)print "\n";
+
+            // Get secondary floating point bounding box data
+            float $Asxmin = `getAttr ($secondaryBlock+".boundingBoxMinX")`;
+            float $Asymin = `getAttr ($secondaryBlock+".boundingBoxMinY")`;
+            float $Aszmin = `getAttr ($secondaryBlock+".boundingBoxMinZ")`;
+            float $Asxmax = `getAttr ($secondaryBlock+".boundingBoxMaxX")`;
+            float $Asymax = `getAttr ($secondaryBlock+".boundingBoxMaxY")`;
+            float $Aszmax = `getAttr ($secondaryBlock+".boundingBoxMaxZ")`;
+            
+            // Snap secondary bounding box data to integers
+            int $sxmin = `SnapValue $Asxmin 5`;
+            int $symin = `SnapValue $Asymin 5`;
+            int $szmin = `SnapValue $Aszmin 5`;
+            int $sxmax = `SnapValue $Asxmax 5`;
+            int $symax = `SnapValue $Asymax 5`;
+            int $szmax = `SnapValue $Aszmax 5`;
+
+            if( $zmin==$szmin && $zmax==$szmax && $ymin==$symin && $ymax==$symax && $axis == "X" )
+            {
+                // If not the end of line, not head
+                if( $xmax == $sxmin )
+                {
+                    // We've continued the chain
+                    // Add to the length
+                    setAttr $attr (`getAttr $attr`+1);
+                    
+                    // Recurse procedure to check for found block
+                    PushLength $attr $secondaryBlock $axis $filter;
+                    break;
+                }
+            }
+            if( $zmin==$szmin && $zmax==$szmax && $xmin==$sxmin && $xmax==$sxmax && $axis == "Y" )
+            {
+                if( $ymax == $symin )
+                {
+                    setAttr $attr (`getAttr $attr`+1);
+                    PushLength $attr $secondaryBlock $axis $filter;
+                    break;
+                }
+            }
+            if( $ymin==$symin && $ymax==$symax && $xmin==$sxmin && $xmax==$sxmax && $axis == "Z" )
+            {
+                if( $zmax == $szmin )
+                {
+                    setAttr $attr (`getAttr $attr`+1);
+                    PushLength $attr $secondaryBlock $axis $filter;
+                    break;
+                }
+            }
+        }
+}
+global proc Iterate( string $axis, string $filter )
+{
+    $onlyErrors = true;
+
+    // Deselect
+    select -cl;
+
+    // Cycle through normal blocks
+    $blockList = `ls -tr $filter`;
+    
+    // Locate head blocks
+    for($currentBlock in $blockList)
+    {
+        // Remove menu items
+        if( isParentOf("cameraMenu",$currentBlock) ) continue;
+        
+        if(!$onlyErrors)print $currentBlock;
+        if(!$onlyErrors)print "\n";
+        
+        //FreezeTransformations;
+        
+        // Get floating point bounding box data
+        float $Axmin = `getAttr ($currentBlock+".boundingBoxMinX")`;
+        float $Aymin = `getAttr ($currentBlock+".boundingBoxMinY")`;
+        float $Azmin = `getAttr ($currentBlock+".boundingBoxMinZ")`;
+        float $Axmax = `getAttr ($currentBlock+".boundingBoxMaxX")`;
+        float $Aymax = `getAttr ($currentBlock+".boundingBoxMaxY")`;
+        float $Azmax = `getAttr ($currentBlock+".boundingBoxMaxZ")`;
+        
+        // Snap bounding box data to integers
+        int $xmin = `SnapValue $Axmin 5`;
+        int $ymin = `SnapValue $Aymin 5`;
+        int $zmin = `SnapValue $Azmin 5`;
+        int $xmax = `SnapValue $Axmax 5`;
+        int $ymax = `SnapValue $Aymax 5`;
+        int $zmax = `SnapValue $Azmax 5`;
+
+        // Object is a head by default        
+        $head = true;
+        
+        // INSERT: Block type check
+        
+        // Check all other blocks to see if head
+        // INSERT: See if it works just as well using blocklist1
+        $blockList2 = `ls -tr $filter`;
+        for($secondaryBlock in $blockList2)
+        {
+            // Remove duplicates and menu items
+            if( ($secondaryBlock==$currentBlock)||(isParentOf("cameraMenu",$secondaryBlock)) ) continue;
+
+            if(!$onlyErrors)print ("Secondary: "+$secondaryBlock);
+            if(!$onlyErrors)print "\n";
+
+            // Get floating point secondary bounding box data
+            float $Asxmin = `getAttr ($secondaryBlock+".boundingBoxMinX")`;
+            float $Asymin = `getAttr ($secondaryBlock+".boundingBoxMinY")`;
+            float $Aszmin = `getAttr ($secondaryBlock+".boundingBoxMinZ")`;
+            float $Asxmax = `getAttr ($secondaryBlock+".boundingBoxMaxX")`;
+            float $Asymax = `getAttr ($secondaryBlock+".boundingBoxMaxY")`;
+            float $Aszmax = `getAttr ($secondaryBlock+".boundingBoxMaxZ")`;
+            
+            // Snap secondary bounding box data to integers
+            int $sxmin = `SnapValue $Asxmin 5`;
+            int $symin = `SnapValue $Asymin 5`;
+            int $szmin = `SnapValue $Aszmin 5`;
+            int $sxmax = `SnapValue $Asxmax 5`;
+            int $symax = `SnapValue $Asymax 5`;
+            int $szmax = `SnapValue $Aszmax 5`;
+
+            // Check if they are colinear
+            if( $zmin==$szmin && $zmax==$szmax && $ymin==$symin && $ymax==$symax && $axis=="X" )
+            { 
+                // If not the end of line, not head
+                if( $xmin == $sxmax )
+                {
+                    $head = false;
+                    setAttr ($currentBlock+".head") false;
+                }
+            }
+            if( $zmin==$szmin && $zmax==$szmax && $xmin==$sxmin && $xmax==$sxmax && $axis=="Y" )
+            { 
+                if( $ymin == $symax )
+                {
+                    $head = false;
+                    setAttr ($currentBlock+".head") false;
+                }
+            }
+            if( $xmin==$sxmin && $xmax==$sxmax && $ymin==$symin && $ymax==$symax && $axis=="Z" )
+            { 
+                if( $zmin == $szmax )
+                {
+                    $head = false;
+                    setAttr ($currentBlock+".head") false;
+                }
+            }
+        }
+        
+        // Select if head
+        if($head) select -add $currentBlock;
+    }
+    
+    // Cycle through heads
+    $blockList = `ls -tr -sl`;    
+    for( $currentBlock in $blockList )
+    {
+        // Play it safe
+        if( isParentOf("cameraMenu",$currentBlock) ) continue;
+
+        // Set length attribute and head attribute of head block
+        setAttr ($currentBlock+".length"+$axis) 1;
+        setAttr ($currentBlock+".head") 1;
+        
+        // Determine the length of the block body
+        PushLength ($currentBlock+".length"+$axis) $currentBlock $axis $filter;
+        
+        // Scale head object to match total length
+        select $currentBlock;
+        ConvertInstanceToObject;
+        xform -ws -piv `getAttr($currentBlock+".boundingBoxMinX")` `getAttr($currentBlock+".boundingBoxMinY")` `getAttr($currentBlock+".boundingBoxMinZ")`;
+        if($axis=="X")scale -ws -r `getAttr($currentBlock+".lengthX")` 1 1;
+        if($axis=="Y")scale -ws -r 1 `getAttr($currentBlock+".lengthY")` 1;
+        if($axis=="Z")scale -ws -r 1 1 `getAttr($currentBlock+".lengthZ")`;
+        //rename "blockOptimized_1";
+    }
+    
+    // Cycle through body blocks
+    select -cl;
+    $blockList = `ls -tr $filter`;
+    for( $currentBlock in $blockList )
+    {
+        // Filter out menu items
+        if( isParentOf("cameraMenu",$currentBlock) ) continue;
+
+        if( `getAttr ($currentBlock+".head")`!= true ) delete $currentBlock;
+    }
+}
+global proc RebuildScene( )
+{
+    // Delete then create head and length attribute
+    $blockList = `ls -tr "block*"`;
+    for( $currentBlock in $blockList )
+    {
+        if(`objExists ($currentBlock+".head")`) deleteAttr ($currentBlock+".head");
+        if(`objExists ($currentBlock+".lengthX")`) deleteAttr ($currentBlock+".lengthX");
+        if(`objExists ($currentBlock+".lengthY")`) deleteAttr ($currentBlock+".lengthY");
+        if(`objExists ($currentBlock+".lengthZ")`) deleteAttr ($currentBlock+".lengthZ");
+    }
+    select "block*";
+    addAttr -at bool -ln "head" -dv false;
+    addAttr -at long -ln "lengthX" -dv 1;
+    addAttr -at long -ln "lengthY" -dv 1;
+    addAttr -at long -ln "lengthZ" -dv 1;
+
+    // First iteration
+    Iterate "X" "block*";
+    Iterate "Y" "block*";
+    Iterate "Z" "block*";
+
+    print "Scene rebuild complete."; 
+}
+
+
