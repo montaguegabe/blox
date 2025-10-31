@@ -1,0 +1,17 @@
+# Xcode user data
+**/xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+
+# Backup files
+hotkeys/*.ma
+hotkeys/*.deleted
+
+# OSX files
+.DS_Store
+.Trashes
+*.swp
+*.lock
+
+# Build files
+build/

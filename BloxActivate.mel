@@ -1,0 +1,76 @@
+//
+//  BloxDeactivate.mel
+//  Blox
+//
+//  Deactivate blox hotkeys
+//
+//  Created by Gabe Montague on 3/16/15.
+//
+//
+
+// Define runtime commands referenced by the hotkeys
+runTimeCommand
+    -annotation ""
+    -category "Custom Scripts.Blox"
+    -hotkeyCtx ""
+    -commandLanguage "mel"
+    -command ("bloxForward")
+    BloxForward;
+
+runTimeCommand
+    -annotation ""
+    -category "Custom Scripts.Blox"
+    -hotkeyCtx ""
+    -commandLanguage "mel"
+    -command ("bloxBackward")
+    BloxBackward;
+
+runTimeCommand
+    -annotation ""
+    -category "Custom Scripts.Blox"
+    -hotkeyCtx ""
+    -commandLanguage "mel"
+    -command ("bloxLeft")
+    BloxLeft;
+
+runTimeCommand
+    -annotation ""
+    -category "Custom Scripts.Blox"
+    -hotkeyCtx ""
+    -commandLanguage "mel"
+    -command ("bloxRight")
+    BloxRight;
+
+
+// Define named commands
+nameCommand
+    -annotation "BloxForwardNameCommand"
+    -sourceType "mel"
+    -command ("BloxForward")
+    BloxForwardNameCommand;
+
+nameCommand
+    -annotation "BloxBackwardNameCommand"
+    -sourceType "mel"
+    -command ("BloxBackward")
+    BloxBackwardNameCommand;
+
+nameCommand
+    -annotation "BloxLeftNameCommand"
+    -sourceType "mel"
+    -command ("BloxLeft")
+    BloxLeftNameCommand;
+
+nameCommand
+    -annotation "BloxRightNameCommand"
+    -sourceType "mel"
+    -command ("BloxRight")
+    BloxRightNameCommand;
+
+
+// Set hotkeys to commands, but don't save
+hotkey -as false;
+hotkey -k "Up" -name "BloxForwardNameCommand";
+hotkey -k "Down" -name "BloxBackwardNameCommand";
+hotkey -k "Right" -name "BloxRightNameCommand";
+hotkey -k "Left" -name "BloxLeftNameCommand";
